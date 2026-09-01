@@ -1,12 +1,6 @@
-name: Build Shruti's Life RPG APK - Kotlin Fix
+name: Build Shruti Life RPG APK
 
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
-
-permissions:
-  contents: read
+on: [push, workflow_dispatch]
 
 jobs:
   build:
