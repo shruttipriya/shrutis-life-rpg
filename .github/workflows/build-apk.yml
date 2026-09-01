@@ -36,12 +36,10 @@ jobs:
           mkdir -p ~/.android /tmp/rpg-signing
           ART_ID=$(gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?per_page=100" --jq '.artifacts | map(select(.name | startswith("shruti-signing-key-"))) | sort_by(.created_at) | last.id // empty')
           if [ -n "$ART_ID" ]; then
-            echo "Restoring signing key artifact $ART_ID"
             gh api -H "Accept: application/vnd.github+json" "/repos/${GITHUB_REPOSITORY}/actions/artifacts/${ART_ID}/zip" > /tmp/rpg-signing/key.zip
             unzip -q /tmp/rpg-signing/key.zip -d /tmp/rpg-signing
             cp /tmp/rpg-signing/debug.keystore ~/.android/debug.keystore
           else
-            echo "No previous signing key found; creating the first persistent key."
             keytool -genkeypair -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 \
               -keystore ~/.android/debug.keystore -storepass android -keypass android \
               -dname "CN=Android Debug,O=Android,C=US" >/dev/null 2>&1
@@ -50,32 +48,20 @@ jobs:
       - name: Build APK
         run: gradle --no-daemon assembleDebug --stacktrace
 
-      - name: Align and explicitly sign APK
+      - name: Verify Gradle-produced APK
         shell: bash
         run: |
           set -e
           BUILD_TOOLS=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort -V | tail -1)
-          ZIPALIGN="$ANDROID_HOME/build-tools/$BUILD_TOOLS/zipalign"
-          APKSIGNER="$ANDROID_HOME/build-tools/$BUILD_TOOLS/apksigner"
-          "$ZIPALIGN" -f -p 4 app/build/outputs/apk/debug/app-debug.apk /tmp/shruti-aligned.apk
-          "$APKSIGNER" sign \
-            --ks ~/.android/debug.keystore \
-            --ks-pass pass:android \
-            --key-pass pass:android \
-            --ks-key-alias androiddebugkey \
-            --v1-signing-enabled true \
-            --v2-signing-enabled true \
-            --v3-signing-enabled true \
-            --out app/build/outputs/apk/debug/shruti-life-rpg-v1.2.apk \
-            /tmp/shruti-aligned.apk
-          "$APKSIGNER" verify --verbose app/build/outputs/apk/debug/shruti-life-rpg-v1.2.apk
-          "$ZIPALIGN" -c -v 4 app/build/outputs/apk/debug/shruti-life-rpg-v1.2.apk
+          "$ANDROID_HOME/build-tools/$BUILD_TOOLS/apksigner" verify --verbose app/build/outputs/apk/debug/app-debug.apk
+          "$ANDROID_HOME/build-tools/$BUILD_TOOLS/zipalign" -c -v 4 app/build/outputs/apk/debug/app-debug.apk
+          cp app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/shruti-life-rpg-v1.3.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: shruti-life-rpg-apk-v1.2
-          path: app/build/outputs/apk/debug/shruti-life-rpg-v1.2.apk
+          name: shruti-life-rpg-apk-v1.3
+          path: app/build/outputs/apk/debug/shruti-life-rpg-v1.3.apk
           if-no-files-found: error
 
       - name: Preserve signing key for future builds
