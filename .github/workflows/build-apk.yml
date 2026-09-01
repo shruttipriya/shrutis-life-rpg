@@ -26,41 +26,6 @@ jobs:
         with:
           gradle-version: '8.7'
 
-      - name: Create stable debug signing key
-        shell: bash
-        run: |
-          mkdir -p "$HOME/.android"
-          keytool -genkeypair \
-            -keystore "$HOME/.android/debug.keystore" \
-            -storepass android \
-            -keypass android \
-            -alias androiddebugkey \
-            -keyalg RSA \
-            -keysize 2048 \
-            -validity 10000 \
-            -dname "CN=Android Debug,O=Android,C=US" \
-            -noprompt
-          cat >> "$GITHUB_ENV" <<'EOF'
-          ANDROID_KEYSTORE=$HOME/.android/debug.keystore
-          ANDROID_KEYSTORE_PASSWORD=android
-          ANDROID_KEY_ALIAS=androiddebugkey
-          ANDROID_KEY_PASSWORD=android
-          EOF
-
-      - name: Configure stable signing
-        shell: bash
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          p = Path('app/build.gradle')
-          s = p.read_text()
-          if 'signingConfigs' not in s:
-              s = s.replace("android {\n", "android {\n    signingConfigs {\n        stable {\n            storeFile file(System.getenv('ANDROID_KEYSTORE'))\n            storePassword System.getenv('ANDROID_KEYSTORE_PASSWORD')\n            keyAlias System.getenv('ANDROID_KEY_ALIAS')\n            keyPassword System.getenv('ANDROID_KEY_PASSWORD')\n        }\n    }\n", 1)
-              s = s.replace("versionName '1.1'", "versionName '1.2'")
-              s = s.replace("    }\n}\n", "    }\n    buildTypes {\n        debug {\n            signingConfig signingConfigs.stable\n        }\n    }\n}\n", 1)
-              p.write_text(s)
-          PY
-
       - name: Build APK
         run: gradle --no-daemon assembleDebug --stacktrace
 
