@@ -48,20 +48,36 @@ jobs:
       - name: Build APK
         run: gradle --no-daemon assembleDebug --stacktrace
 
-      - name: Verify Gradle-produced APK
+      - name: Verify APK signature and alignment
         shell: bash
         run: |
           set -e
           BUILD_TOOLS=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort -V | tail -1)
-          "$ANDROID_HOME/build-tools/$BUILD_TOOLS/apksigner" verify --verbose app/build/outputs/apk/debug/app-debug.apk
-          "$ANDROID_HOME/build-tools/$BUILD_TOOLS/zipalign" -c -v 4 app/build/outputs/apk/debug/app-debug.apk
-          cp app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/shruti-life-rpg-v1.3.apk
+          APK=app/build/outputs/apk/debug/app-debug.apk
+          "$ANDROID_HOME/build-tools/$BUILD_TOOLS/apksigner" verify --verbose --print-certs "$APK"
+          "$ANDROID_HOME/build-tools/$BUILD_TOOLS/zipalign" -c -v 4 "$APK"
+          "$ANDROID_HOME/build-tools/$BUILD_TOOLS/aapt" dump badging "$APK" | tee /tmp/apk-badging.txt
+          grep -q "package: name='com.shruti.liferpg'" /tmp/apk-badging.txt
+          grep -q "targetSdkVersion:'35'" /tmp/apk-badging.txt
+          cp "$APK" app/build/outputs/apk/debug/shruti-life-rpg-v1.4.apk
+
+      - name: Test install on Android emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: Pixel_6
+          script: |
+            adb install -r app/build/outputs/apk/debug/shruti-life-rpg-v1.4.apk
+            adb shell pm path com.shruti.liferpg
+            adb shell monkey -p com.shruti.liferpg 1
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: shruti-life-rpg-apk-v1.3
-          path: app/build/outputs/apk/debug/shruti-life-rpg-v1.3.apk
+          name: shruti-life-rpg-apk-v1.4
+          path: app/build/outputs/apk/debug/shruti-life-rpg-v1.4.apk
           if-no-files-found: error
 
       - name: Preserve signing key for future builds
