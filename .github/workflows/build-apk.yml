@@ -50,11 +50,32 @@ jobs:
       - name: Build APK
         run: gradle --no-daemon assembleDebug --stacktrace
 
+      - name: Align and explicitly sign APK
+        shell: bash
+        run: |
+          set -e
+          BUILD_TOOLS=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort -V | tail -1)
+          ZIPALIGN="$ANDROID_HOME/build-tools/$BUILD_TOOLS/zipalign"
+          APKSIGNER="$ANDROID_HOME/build-tools/$BUILD_TOOLS/apksigner"
+          "$ZIPALIGN" -f -p 4 app/build/outputs/apk/debug/app-debug.apk /tmp/shruti-aligned.apk
+          "$APKSIGNER" sign \
+            --ks ~/.android/debug.keystore \
+            --ks-pass pass:android \
+            --key-pass pass:android \
+            --ks-key-alias androiddebugkey \
+            --v1-signing-enabled true \
+            --v2-signing-enabled true \
+            --v3-signing-enabled true \
+            --out app/build/outputs/apk/debug/shruti-life-rpg-v1.2.apk \
+            /tmp/shruti-aligned.apk
+          "$APKSIGNER" verify --verbose app/build/outputs/apk/debug/shruti-life-rpg-v1.2.apk
+          "$ZIPALIGN" -c -v 4 app/build/outputs/apk/debug/shruti-life-rpg-v1.2.apk
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: shruti-life-rpg-apk-v1.2
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: app/build/outputs/apk/debug/shruti-life-rpg-v1.2.apk
           if-no-files-found: error
 
       - name: Preserve signing key for future builds
