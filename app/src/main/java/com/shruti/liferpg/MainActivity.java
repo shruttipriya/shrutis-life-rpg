@@ -41,7 +41,7 @@ public class MainActivity extends Activity {
             @Override public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
                 applyWebInsets();
-                view.evaluateJavascript("(function(){var s=document.createElement('script');s.src='file:///android_asset/bonus.js';document.head.appendChild(s);})()", null);
+                view.evaluateJavascript("(function(){['bonus.js','whimsy.js'].forEach(function(f){var s=document.createElement('script');s.src='file:///android_asset/'+f;document.head.appendChild(s);});})()", null);
             }
         });
         webView.setWebChromeClient(new WebChromeClient());
