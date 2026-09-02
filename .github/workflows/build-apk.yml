@@ -59,13 +59,13 @@ jobs:
           "$ANDROID_HOME/build-tools/$BUILD_TOOLS/aapt" dump badging "$APK" | tee /tmp/apk-badging.txt
           grep -q "package: name='com.shruti.liferpg'" /tmp/apk-badging.txt
           grep -q "targetSdkVersion:'35'" /tmp/apk-badging.txt
-          cp "$APK" app/build/outputs/apk/debug/shruti-life-rpg-v1.5.apk
+          cp "$APK" app/build/outputs/apk/debug/shruti-life-rpg-v1.6.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: shruti-life-rpg-apk-v1.5
-          path: app/build/outputs/apk/debug/shruti-life-rpg-v1.5.apk
+          name: shruti-life-rpg-apk-v1.6
+          path: app/build/outputs/apk/debug/shruti-life-rpg-v1.6.apk
           if-no-files-found: error
 
       - name: Test install on Android emulator (informational)
@@ -77,7 +77,7 @@ jobs:
           arch: x86_64
           profile: pixel_2
           script: |
-            adb install -r app/build/outputs/apk/debug/shruti-life-rpg-v1.5.apk
+            adb install -r app/build/outputs/apk/debug/shruti-life-rpg-v1.6.apk
             adb shell pm path com.shruti.liferpg
             adb shell monkey -p com.shruti.liferpg 1
 
