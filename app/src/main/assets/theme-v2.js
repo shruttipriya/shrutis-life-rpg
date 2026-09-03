@@ -14,7 +14,7 @@ body{
  linear-gradient(180deg,#f3eafa 0%,#fff8f3 58%,#f7effb 100%)!important;
  font-family:system-ui,-apple-system,"Segoe UI",sans-serif!important;
 }
-.app{max-width:720px;padding:18px 14px 110px!important}
+.app{max-width:720px;padding:18px 14px 24px!important}
 .top{margin-bottom:18px!important}.brand{font-size:25px!important;font-weight:900!important;color:#4b3760!important;letter-spacing:-.5px!important}.sub,.tiny{color:var(--muted)!important}.pill{background:rgba(255,255,255,.58)!important;border:1px solid #d8c4e3!important;color:#705b7f!important}
 .hero{border:1px solid #d8b9df!important;border-radius:26px!important;padding:18px!important;background:linear-gradient(135deg,#fff8f5 0%,#f7edff 58%,#eeeafd 100%)!important;box-shadow:0 12px 30px rgba(113,76,130,.12)!important}
 .hero:after{color:#8d72c633!important}.orb{background:linear-gradient(145deg,#f4a7c8,#9c88d8)!important;box-shadow:0 8px 20px rgba(173,113,173,.20)!important}.hero h1{color:#49365e!important}.coins{color:#c58b2c!important}
@@ -31,8 +31,11 @@ body{
 .shopgrid{gap:10px!important}.shopitem{background:rgba(255,250,247,.9)!important}.shopicon{font-size:30px}.price{color:#c58b2c!important}
 input,select,textarea{background:#fffafc!important;border-color:#d9c7e0!important;color:#4b385c!important}label{color:#806f8d!important}
 .job{border-left-color:#e18db5!important}.badge{background:#f0e5f4!important}
-.tabs{background:rgba(255,250,247,.94)!important;border-top:1px solid #dccbe4!important;box-shadow:0 -6px 22px rgba(106,76,121,.08)!important}.tabs button{color:#8c7897!important;font-size:11px!important}.tabs button.active{color:#5a3f70!important}
+.tabs{background:rgba(255,250,247,.96)!important;border-top:1px solid #dccbe4!important;box-shadow:0 -6px 22px rgba(106,76,121,.08)!important}.tabs button{color:#8c7897!important;font-size:11px!important}.tabs button.active{color:#5a3f70!important}
 .toast{background:#fff8f4!important;border-color:#d7b9dd!important;color:#50385f!important;box-shadow:0 12px 30px rgba(95,64,110,.16)!important}.confetti{opacity:.55!important}
+/* Bonus Missions: keep the feature consistent with the pastel theme. */
+#bonusBoard{margin:16px 0!important;border:1px solid #dfcfe7!important;border-radius:24px!important;padding:15px!important;background:linear-gradient(145deg,#fff8f5,#f6ecff 62%,#eeeafd)!important;box-shadow:var(--shadow)!important;color:var(--text)!important}
+#bonusBoard .bbt{color:#49365c!important}.bbs{color:#806f8d!important}.bbl{background:#f1dfec!important;color:#b48735!important}.bbp{background:#eadff0!important}.bbp i{background:linear-gradient(90deg,#e88db9,#f0bd63,#77c5a7)!important}.bbm{background:rgba(255,250,247,.86)!important;border:1px solid #dfcfe7!important;color:var(--text)!important}.bbm.done{opacity:.65;border-color:#a9d7c5!important}.bbt2{color:#49365c!important}.bbd{color:#806f8d!important}.bbr{color:#b48735!important}.bbb{background:linear-gradient(90deg,#e88db9,#9a82d4)!important;color:#fff!important}.bbc{background:#f0bd63!important;color:#49321b!important}.bbch{background:linear-gradient(135deg,#fff0df,#eee7fa)!important;border:1px solid #ddc3b0!important;color:#49365c!important}
 @media(max-width:420px){.app{padding-left:11px!important;padding-right:11px!important}.brand{font-size:22px!important}.card,.stat{padding:12px!important}.tabs button{padding-left:9px!important;padding-right:9px!important}}
 `;
   var s=document.createElement('style');s.id='theme-v2';s.textContent=css;document.head.appendChild(s);
