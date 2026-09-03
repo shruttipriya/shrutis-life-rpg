@@ -41,7 +41,7 @@ jobs:
           fi
       - name: Build APK
         run: gradle --no-daemon assembleDebug --stacktrace
-      - name: Verify APK signature and alignment
+      - name: Verify APK signature, alignment, package and UI assets
         shell: bash
         run: |
           set -e
@@ -52,15 +52,17 @@ jobs:
           "$ANDROID_HOME/build-tools/$BUILD_TOOLS/aapt" dump badging "$APK" | tee /tmp/apk-badging.txt
           grep -q "package: name='com.shruti.liferpg'" /tmp/apk-badging.txt
           grep -q "targetSdkVersion:'35'" /tmp/apk-badging.txt
-          cp "$APK" app/build/outputs/apk/debug/shruti-life-rpg-v1.9.apk
+          unzip -l "$APK" | grep -q "assets/whimsy.js"
+          unzip -l "$APK" | grep -q "assets/theme-v2.js"
+          unzip -l "$APK" | grep -q "assets/bonus.js"
+          cp "$APK" app/build/outputs/apk/debug/shruti-life-rpg-v1.10.apk
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: shruti-life-rpg-apk-v1.9
-          path: app/build/outputs/apk/debug/shruti-life-rpg-v1.9.apk
+          name: shruti-life-rpg-apk-v1.10
+          path: app/build/outputs/apk/debug/shruti-life-rpg-v1.10.apk
           if-no-files-found: error
-      - name: Test install on Android emulator (informational)
-        continue-on-error: true
+      - name: Test install on Android emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 35
@@ -68,7 +70,7 @@ jobs:
           arch: x86_64
           profile: pixel_2
           script: |
-            adb install -r app/build/outputs/apk/debug/shruti-life-rpg-v1.9.apk
+            adb install -r app/build/outputs/apk/debug/shruti-life-rpg-v1.10.apk
             adb shell pm path com.shruti.liferpg
             adb shell monkey -p com.shruti.liferpg 1
       - name: Preserve signing key for future builds
