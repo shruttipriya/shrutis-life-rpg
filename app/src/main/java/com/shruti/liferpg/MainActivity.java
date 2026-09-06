@@ -1,38 +1,62 @@
 package com.shruti.liferpg;
 
 import android.app.Activity;
+import android.graphics.Color;
+import android.graphics.Insets;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.FrameLayout;
 
 public class MainActivity extends Activity {
     private WebView webView;
+    private FrameLayout root;
     private int insetTop = 0, insetBottom = 0;
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
+
+        // Keep the app's pastel background visible in the Android system-bar areas.
+        getWindow().setStatusBarColor(Color.TRANSPARENT);
+        getWindow().setNavigationBarColor(Color.TRANSPARENT);
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+
+        root = new FrameLayout(this);
+        root.setBackgroundColor(Color.rgb(255, 248, 252));
+
         webView = new WebView(this);
         WebSettings s = webView.getSettings();
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);
         s.setAllowFileAccess(true);
         s.setAllowContentAccess(false);
+        s.setBuiltInZoomControls(false);
+        s.setDisplayZoomControls(false);
 
-        webView.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
+        root.addView(webView, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
+
+        // The WebView itself is kept strictly inside the system-bar safe area.
+        // This fixes the Android 15 edge-to-edge overlap without changing the
+        // existing HTML/CSS layout, animations, icons, or navigation styling.
+        root.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
             @Override public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
-                if (android.os.Build.VERSION.SDK_INT >= 30) {
-                    android.graphics.Insets bars = insets.getInsets(WindowInsets.Type.systemBars());
+                if (Build.VERSION.SDK_INT >= 30) {
+                    Insets bars = insets.getInsets(WindowInsets.Type.systemBars());
                     insetTop = bars.top;
                     insetBottom = bars.bottom;
                 } else {
                     insetTop = insets.getSystemWindowInsetTop();
                     insetBottom = insets.getSystemWindowInsetBottom();
                 }
-                applyWebInsets();
+                applyWebBounds();
                 return insets;
             }
         });
@@ -40,26 +64,24 @@ public class MainActivity extends Activity {
         webView.setWebViewClient(new WebViewClient() {
             @Override public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                applyWebInsets();
+                // Keep the existing app assets exactly as they are; only load them.
                 view.evaluateJavascript("(function(){['bonus.js','theme-v2.js','whimsy.js'].forEach(function(f){var s=document.createElement('script');s.src='file:///android_asset/'+f;document.head.appendChild(s);});})()", null);
             }
         });
         webView.setWebChromeClient(new WebChromeClient());
         webView.loadUrl("file:///android_asset/index.html");
-        setContentView(webView);
+        setContentView(root);
+        root.requestApplyInsets();
     }
 
-    private void applyWebInsets() {
-        if (webView == null) return;
-        final int top = insetTop;
-        final int bottom = insetBottom;
-        final int nav = bottom + 58;
-        webView.post(() -> webView.evaluateJavascript(
-            "(function(){var root=document.documentElement;root.style.setProperty('--nav-h','"+nav+"px');"+
-            "document.body.style.height='100dvh';document.body.style.overflow='hidden';"+
-            "var a=document.querySelector('.app');if(a){a.style.paddingTop='"+top+"px';a.style.height='calc(100dvh - "+nav+"px)';a.style.maxHeight='calc(100dvh - "+nav+"px)';a.style.overflowY='auto';a.style.overscrollBehavior='contain';a.style.paddingBottom='24px';}"+
-            "var t=document.querySelector('.tabs');if(t){t.style.paddingBottom='"+bottom+"px';t.style.height='"+nav+"px';}"+
-            "})()", null));
+    private void applyWebBounds() {
+        if (root == null || webView == null) return;
+        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) webView.getLayoutParams();
+        lp.leftMargin = 0;
+        lp.topMargin = insetTop;
+        lp.rightMargin = 0;
+        lp.bottomMargin = insetBottom;
+        webView.setLayoutParams(lp);
     }
 
     @Override public void onBackPressed() {
