@@ -69,7 +69,24 @@ jobs:
           target: google_apis
           arch: x86_64
           profile: pixel_2
+          force-avd-creation: true
+          emulator-options: -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect -no-snapshot -wipe-data
+          disable-animations: true
           script: |
+            set -e
+            adb start-server
+            for i in {1..60}; do
+              if adb wait-for-device >/dev/null 2>&1; then break; fi
+              sleep 2
+            done
+            for i in {1..120}; do
+              STATE=$(adb get-state 2>/dev/null || true)
+              BOOT=$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r' || true)
+              if [ "$STATE" = "device" ] && [ "$BOOT" = "1" ]; then break; fi
+              sleep 2
+            done
+            test "$(adb get-state)" = "device"
+            test "$(adb shell getprop sys.boot_completed | tr -d '\r')" = "1"
             adb install -r app/build/outputs/apk/debug/shruti-life-rpg-v1.10.apk
             adb shell pm path com.shruti.liferpg
             adb shell monkey -p com.shruti.liferpg 1
