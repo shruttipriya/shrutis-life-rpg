@@ -43,9 +43,7 @@ public class MainActivity extends Activity {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
 
-        // The WebView itself is kept strictly inside the system-bar safe area.
-        // This fixes the Android 15 edge-to-edge overlap without changing the
-        // existing HTML/CSS layout, animations, icons, or navigation styling.
+        // Keep the WebView strictly inside the Android system-bar safe area.
         root.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
             @Override public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
                 if (Build.VERSION.SDK_INT >= 30) {
@@ -64,6 +62,15 @@ public class MainActivity extends Activity {
         webView.setWebViewClient(new WebViewClient() {
             @Override public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
+
+                // Only adjust the bottom navigation container. Keep the existing
+                // animations, icons, cards, colors and all other UI unchanged.
+                String bottomNavFix = "(function(){var s=document.createElement('style');s.id='bottom-nav-safe-fix';s.textContent="
+                        + "'.tabs{height:64px!important;bottom:0!important;padding:0!important;align-items:center!important;}"
+                        + ".tabs button{height:64px!important;padding:8px 12px!important;display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;line-height:1.15!important;}"
+                        + ".app{padding-bottom:78px!important;}';document.head.appendChild(s);})()";
+                view.evaluateJavascript(bottomNavFix, null);
+
                 // Keep the existing app assets exactly as they are; only load them.
                 view.evaluateJavascript("(function(){['bonus.js','theme-v2.js','whimsy.js'].forEach(function(f){var s=document.createElement('script');s.src='file:///android_asset/'+f;document.head.appendChild(s);});})()", null);
             }
