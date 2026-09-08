@@ -14,7 +14,7 @@ body{
  linear-gradient(180deg,#f3eafa 0%,#fff8f3 58%,#f7effb 100%)!important;
  font-family:system-ui,-apple-system,"Segoe UI",sans-serif!important;
 }
-.app{max-width:720px;padding:18px 14px 24px!important}
+.app{max-width:720px;padding:18px 14px 160px!important}
 .top{margin-bottom:18px!important}.brand{font-size:25px!important;font-weight:900!important;color:#4b3760!important;letter-spacing:-.5px!important}.sub,.tiny{color:var(--muted)!important}.pill{background:rgba(255,255,255,.58)!important;border:1px solid #d8c4e3!important;color:#705b7f!important}
 .hero{border:1px solid #d8b9df!important;border-radius:26px!important;padding:18px!important;background:linear-gradient(135deg,#fff8f5 0%,#f7edff 58%,#eeeafd 100%)!important;box-shadow:0 12px 30px rgba(113,76,130,.12)!important}
 .hero:after{color:#8d72c633!important}.orb{background:linear-gradient(145deg,#f4a7c8,#9c88d8)!important;box-shadow:0 8px 20px rgba(173,113,173,.20)!important}.hero h1{color:#49365e!important}.coins{color:#c58b2c!important}
