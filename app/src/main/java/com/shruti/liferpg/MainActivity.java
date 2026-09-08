@@ -63,12 +63,13 @@ public class MainActivity extends Activity {
             @Override public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
 
-                // Only adjust the bottom navigation container. Keep the existing
-                // animations, icons, cards, colors and all other UI unchanged.
+                // Keep the existing animations, icons, cards, colors and all other UI unchanged.
+                // Reserve enough scroll space below the final content so the fixed bottom
+                // navigation never covers the Mystery Chest and the content after it.
                 String bottomNavFix = "(function(){var s=document.createElement('style');s.id='bottom-nav-safe-fix';s.textContent="
                         + "'.tabs{height:64px!important;bottom:0!important;padding:0!important;align-items:center!important;}"
                         + ".tabs button{height:64px!important;padding:8px 12px!important;display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;line-height:1.15!important;}"
-                        + ".app{padding-bottom:78px!important;}';document.head.appendChild(s);})()";
+                        + ".app{padding-bottom:160px!important;}';document.head.appendChild(s);})()";
                 view.evaluateJavascript(bottomNavFix, null);
 
                 // Keep the existing app assets exactly as they are; only load them.
