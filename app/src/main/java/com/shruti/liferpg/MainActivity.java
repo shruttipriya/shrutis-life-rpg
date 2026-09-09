@@ -72,8 +72,9 @@ public class MainActivity extends Activity {
                         + ".app{padding-bottom:160px!important;}';document.head.appendChild(s);})()";
                 view.evaluateJavascript(bottomNavFix, null);
 
-                // Keep the existing app assets exactly as they are; only load them.
-                view.evaluateJavascript("(function(){['bonus.js','theme-v2.js','whimsy.js'].forEach(function(f){var s=document.createElement('script');s.src='file:///android_asset/'+f;document.head.appendChild(s);});})()", null);
+                // Existing assets are loaded first; the repair layer then owns the shared game state
+                // and fixes XP/reward/chest interactions without altering the visual UI.
+                view.evaluateJavascript("(function(){['bonus.js','theme-v2.js','whimsy.js','game-fixes.js'].forEach(function(f){var s=document.createElement('script');s.src='file:///android_asset/'+f;document.head.appendChild(s);});})()", null);
             }
         });
         webView.setWebChromeClient(new WebChromeClient());
