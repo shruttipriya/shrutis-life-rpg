@@ -118,3 +118,30 @@
   setTimeout(function(){migrate();patchBonusUI();},0);
   setTimeout(function(){patchBonusUI();},500);
 })();
+
+
+// Dashboard visibility fallback: if the primary renderer stops before populating
+// Today's Quests, restore the quest cards without changing the existing UI.
+(function(){
+  var fallbackQs=[
+    ['jobs','💼','Career: complete 3 applications','3 quality applications',35,14,'CAREER'],
+    ['bath','🛁','Take a proper bath / shower','Reset your body and feel fresh',12,8,'BODY'],
+    ['skincare','🧴','Nighttime skincare','Cleanse + moisturise + 2 minutes for yourself',12,10,'SELF-CARE'],
+    ['teeth','🪥','Full nighttime dental reset','Brush well + floss or mouthwash',10,8,'SELF-CARE'],
+    ['hair','💆','Tiny grooming reset','Comb/brush hair, moisturise lips, feel put together',10,8,'SELF-CARE'],
+    ['exercise','💪','Move for 20+ minutes','Walk, workout, stretch or dance',20,12,'BODY'],
+    ['focus','🎯','Complete one 25-min deep-work block','Phone away. One tiny mission.',18,10,'FOCUS'],
+    ['learn','🧠','Learn / read for 15 minutes','Book, course, useful article or skill practice',15,9,'WISDOM'],
+    ['water','💧','Hit your water goal','Keep your bottle nearby and finish your target',10,7,'BODY'],
+    ['reset','✨','10-minute room reset','Make tomorrow-you happy',10,7,'LIFE'],
+    ['journal','📓','Write 2 honest lines','No perfect journaling required',10,7,'LIFE'],
+    ['tomorrow','🌙','Prepare for tomorrow','Clothes, bag, priorities — future you says thanks',10,8,'NIGHT']
+  ];
+  function restore(){
+    var q=document.getElementById('quests');
+    if(!q||q.children.length)return;
+    q.innerHTML=fallbackQs.map(function(x){return '<div class="card questcard"><div class="quest"><div class="check" onclick="toggleQuest(\''+x[0]+'\')"></div><div class="qmain"><div class="tag">'+x[6]+'</div><div class="qtitle">'+x[1]+' '+x[2]+'</div><div class="qdesc">'+x[3]+'</div></div><div class="reward"><div class="xp">+'+x[4]+' XP</div><div class="coinreward">🪙 +'+x[5]+'</div></div></div></div>';}).join('');
+  }
+  setTimeout(restore,50);setTimeout(restore,500);setTimeout(restore,1500);
+  new MutationObserver(restore).observe(document.getElementById('quests')||document.body,{childList:true,subtree:true});
+})();
