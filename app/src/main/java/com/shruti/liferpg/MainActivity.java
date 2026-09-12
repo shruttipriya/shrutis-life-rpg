@@ -21,15 +21,11 @@ public class MainActivity extends Activity {
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
-
-        // Keep the app's pastel background visible in the Android system-bar areas.
         getWindow().setStatusBarColor(Color.TRANSPARENT);
         getWindow().setNavigationBarColor(Color.TRANSPARENT);
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-
         root = new FrameLayout(this);
         root.setBackgroundColor(Color.rgb(255, 248, 252));
-
         webView = new WebView(this);
         WebSettings s = webView.getSettings();
         s.setJavaScriptEnabled(true);
@@ -38,43 +34,28 @@ public class MainActivity extends Activity {
         s.setAllowContentAccess(false);
         s.setBuiltInZoomControls(false);
         s.setDisplayZoomControls(false);
-
-        root.addView(webView, new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT));
-
-        // Keep the WebView strictly inside the Android system-bar safe area.
+        root.addView(webView, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         root.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
             @Override public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
                 if (Build.VERSION.SDK_INT >= 30) {
                     Insets bars = insets.getInsets(WindowInsets.Type.systemBars());
-                    insetTop = bars.top;
-                    insetBottom = bars.bottom;
+                    insetTop = bars.top; insetBottom = bars.bottom;
                 } else {
-                    insetTop = insets.getSystemWindowInsetTop();
-                    insetBottom = insets.getSystemWindowInsetBottom();
+                    insetTop = insets.getSystemWindowInsetTop(); insetBottom = insets.getSystemWindowInsetBottom();
                 }
-                applyWebBounds();
-                return insets;
+                applyWebBounds(); return insets;
             }
         });
-
         webView.setWebViewClient(new WebViewClient() {
             @Override public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-
-                // Keep the existing animations, icons, cards, colors and all other UI unchanged.
-                // Reserve enough scroll space below the final content so the fixed bottom
-                // navigation never covers the Mystery Chest and the content after it.
                 String bottomNavFix = "(function(){var s=document.createElement('style');s.id='bottom-nav-safe-fix';s.textContent="
                         + "'.tabs{height:64px!important;bottom:0!important;padding:0!important;align-items:center!important;}"
                         + ".tabs button{height:64px!important;padding:8px 12px!important;display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;line-height:1.15!important;}"
                         + ".app{padding-bottom:160px!important;}';document.head.appendChild(s);})()";
                 view.evaluateJavascript(bottomNavFix, null);
-
-                // Existing assets are loaded first; the repair layer then owns the shared game state
-                // and fixes XP/reward/chest interactions without altering the visual UI.
-                view.evaluateJavascript("(function(){['bonus.js','theme-v2.js','whimsy.js','game-fixes.js'].forEach(function(f){var s=document.createElement('script');s.src='file:///android_asset/'+f;document.head.appendChild(s);});})()", null);
+                // Load only the app's original runtime scripts. Do not inject a second renderer/state layer.
+                view.evaluateJavascript("(function(){['bonus.js','theme-v2.js','whimsy.js'].forEach(function(f){var s=document.createElement('script');s.src='file:///android_asset/'+f;document.head.appendChild(s);});})()", null);
             }
         });
         webView.setWebChromeClient(new WebChromeClient());
@@ -86,10 +67,7 @@ public class MainActivity extends Activity {
     private void applyWebBounds() {
         if (root == null || webView == null) return;
         FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) webView.getLayoutParams();
-        lp.leftMargin = 0;
-        lp.topMargin = insetTop;
-        lp.rightMargin = 0;
-        lp.bottomMargin = insetBottom;
+        lp.leftMargin = 0; lp.topMargin = insetTop; lp.rightMargin = 0; lp.bottomMargin = insetBottom;
         webView.setLayoutParams(lp);
     }
 
